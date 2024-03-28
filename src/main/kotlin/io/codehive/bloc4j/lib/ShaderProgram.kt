@@ -31,6 +31,14 @@ class ShaderProgram(
     gl.glUseProgram(shaderProgram)
   }
 
+  fun setInt(name: String, value: Int) {
+    gl.glUniform1i(gl.glGetUniformLocation(shaderProgram, name), value)
+  }
+
+  fun setFloat(name: String, value: Float) {
+    gl.glUniform1f(gl.glGetUniformLocation(shaderProgram, name), value)
+  }
+
   fun delete() {
     gl.glDeleteProgram(shaderProgram)
   }

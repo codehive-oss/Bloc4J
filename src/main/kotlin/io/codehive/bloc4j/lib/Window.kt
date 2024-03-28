@@ -62,7 +62,7 @@ object Window : GLEventListener, KeyListener, MouseListener {
       return
     }
     val gl = glAutoDrawable.gl.gL3
-    application.display(gl)
+    application.display(gl, glAutoDrawable.animator.totalFPSFrames)
   }
 
   override fun reshape(glAutoDrawable: GLAutoDrawable, x: Int, y: Int, width: Int, height: Int) {

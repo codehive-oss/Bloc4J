@@ -7,7 +7,7 @@ import org.joml.Vector2i
 interface GraphicsApplication {
   fun init(gl: GL3)
 
-  fun display(gl: GL3)
+  fun display(gl: GL3, frame: Int)
 
   fun reshape(gl: GL3, dimensions: Vector2i)
 
