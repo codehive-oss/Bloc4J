@@ -18,6 +18,8 @@ dependencies {
     implementation("org.jogamp.jogl:jogl-all-main:$joglVersion")
 
     implementation("org.joml:joml:1.10.5")
+
+    implementation("commons-io:commons-io:2.15.1")
 }
 
 application {
