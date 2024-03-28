@@ -6,7 +6,7 @@ plugins {
 group = "io.codehive"
 version = "1.0-SNAPSHOT"
 
-val mainClassName = "io.codehive.bloc4j.Main"
+val mainClassName = "io.codehive.bloc4j.MainKt"
 val joglVersion = "2.3.2"
 
 repositories {

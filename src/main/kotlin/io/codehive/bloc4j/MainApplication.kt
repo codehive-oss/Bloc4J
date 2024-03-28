@@ -1,7 +1,6 @@
 package io.codehive.bloc4j
 
 import com.jogamp.newt.event.KeyEvent
-import com.jogamp.opengl.GL
 import com.jogamp.opengl.GL.*
 import com.jogamp.opengl.GL3
 import com.jogamp.opengl.util.GLBuffers
@@ -16,7 +15,7 @@ class MainApplication : GraphicsApplication {
 
   private lateinit var vao: IntBuffer
   private lateinit var shaderProgram: ShaderProgram
-  private lateinit var texture: Texture;
+  private lateinit var texture: Texture
 
   private var vertices: FloatArray = floatArrayOf(
     0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
@@ -47,7 +46,7 @@ class MainApplication : GraphicsApplication {
 
     val vbo = GLBuffers.newDirectIntBuffer(1)
     gl.glGenBuffers(1, vbo)
-    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo[0])
+    gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[0])
 
     val floatBuffer = GLBuffers.newDirectFloatBuffer(vertices)
     gl.glBufferData(
