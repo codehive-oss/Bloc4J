@@ -1,4 +1,4 @@
-package io.codehive.bloc4j.lib
+package io.codehive.bloc4j.graphics.lib
 
 import com.jogamp.newt.event.*
 import com.jogamp.newt.opengl.GLWindow
@@ -7,6 +7,7 @@ import com.jogamp.opengl.GLCapabilities
 import com.jogamp.opengl.GLEventListener
 import com.jogamp.opengl.GLProfile
 import com.jogamp.opengl.util.Animator
+import io.codehive.input.KeyboardInput
 import org.joml.Vector2i
 
 object Window : GLEventListener, KeyListener, MouseListener {
@@ -14,10 +15,17 @@ object Window : GLEventListener, KeyListener, MouseListener {
   private lateinit var application: GraphicsApplication
   private lateinit var window: GLWindow
 
+  val width
+    get() = window.width
+  val height
+    get() = window.height
+
+
   fun init(application: GraphicsApplication, title: String, initialSize: Vector2i) {
-    this.application = application
+    Window.application = application
     val glProfile = GLProfile.get(GLProfile.GL3)
     val glCapabilities = GLCapabilities(glProfile)
+
 
     window = GLWindow.create(glCapabilities).apply {
       isUndecorated = false
@@ -26,12 +34,13 @@ object Window : GLEventListener, KeyListener, MouseListener {
       isPointerVisible = true
       confinePointer(false)
       this.title = title
-      setSize(initialSize.x(), initialSize.y())
+      setSize(initialSize.x, initialSize.y)
       isVisible = true
     }
 
     window.addGLEventListener(this)
     window.addKeyListener(this)
+    window.addKeyListener(KeyboardInput)
     window.addMouseListener(this)
 
     val animator = Animator()

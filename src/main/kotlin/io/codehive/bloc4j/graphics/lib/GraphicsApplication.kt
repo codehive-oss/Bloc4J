@@ -1,4 +1,4 @@
-package io.codehive.bloc4j.lib
+package io.codehive.bloc4j.graphics.lib
 
 import com.jogamp.newt.event.KeyEvent
 import com.jogamp.opengl.GL3

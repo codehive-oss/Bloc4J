@@ -1,10 +1,11 @@
-package io.codehive.bloc4j.lib
+package io.codehive.bloc4j.graphics.lib
 
 import com.jogamp.opengl.GL
 import com.jogamp.opengl.GL2ES2.*
 import com.jogamp.opengl.GL3
 import com.jogamp.opengl.util.GLBuffers
 import org.apache.commons.io.IOUtils
+import org.joml.Matrix4f
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
@@ -37,6 +38,15 @@ class ShaderProgram(
 
   fun setFloat(name: String, value: Float) {
     gl.glUniform1f(gl.glGetUniformLocation(shaderProgram, name), value)
+  }
+
+  fun setMat4f(name: String, value: Matrix4f) {
+    gl.glUniformMatrix4fv(
+      gl.glGetUniformLocation(shaderProgram, name),
+      1,
+      false,
+      value.get(GLBuffers.newDirectFloatBuffer(16))
+    )
   }
 
   fun delete() {
