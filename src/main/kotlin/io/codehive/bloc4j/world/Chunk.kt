@@ -101,10 +101,13 @@ class Chunk(
 
     if (neighbour.x !in 0..<16) {
       // TODO
+      drawFace = true
     } else if (neighbour.y !in 0..<16) {
       // TODO
+      drawFace = true
     } else if (neighbour.z !in 0..<16) {
       // TODO
+      drawFace = true
     } else {
       val neighbourIndex = positionToIndex(neighbour);
       drawFace = data[neighbourIndex] == BlockType.AIR.id
