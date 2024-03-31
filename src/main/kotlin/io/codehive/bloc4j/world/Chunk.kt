@@ -97,24 +97,25 @@ class Chunk(
     face: BlockFace,
     type: BlockType
   ): Int {
-    var drawFace = false
-    val neighbour = Vector3i(index).add(face.dir)
+    val neighbour: BlockType
+    val neighbourPos = Vector3i(index).add(face.dir)
 
-    if (neighbour.x !in 0..<16) {
+    if (neighbourPos.x !in 0..<16) {
       // TODO
-      drawFace = true
-    } else if (neighbour.y !in 0..<16) {
+      neighbour = BlockType.AIR
+    } else if (neighbourPos.y !in 0..<16) {
       // TODO
-      drawFace = true
-    } else if (neighbour.z !in 0..<16) {
+      neighbour = BlockType.AIR
+    } else if (neighbourPos.z !in 0..<16) {
       // TODO
-      drawFace = true
+      neighbour = BlockType.AIR
     } else {
-      val neighbourIndex = positionToIndex(neighbour);
-      drawFace = data[neighbourIndex].toInt() == BlockType.AIR.ordinal
+      val neighbourIndex = positionToIndex(neighbourPos)
+      neighbour = BlockType.entries[data[neighbourIndex].toInt()]
     }
 
-    if (drawFace) {
+    // Add more like GLASS etc...
+    if (neighbour == BlockType.AIR) {
       val (pos, uv, idx) = createFace(offset, currentIndex, face, type)
       positions.addAll(pos)
       uvs.addAll(uv)
