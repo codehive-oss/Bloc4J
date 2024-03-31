@@ -4,6 +4,7 @@ import com.jogamp.opengl.GL3
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator
 import io.codehive.bloc4j.graphics.lib.Mesh
 import org.joml.Vector3f
+import org.joml.Vector3i
 
 class Chunk(
   val x: Int,
@@ -43,6 +44,10 @@ class Chunk(
     }
   }
 
+  fun positionToIndex(pos: Vector3i): Int {
+    return pos.y * 16 * 16 + pos.z * 16 + pos.x
+  }
+
   fun recalculate(gl: GL3) {
     val positions: ArrayList<Float> = ArrayList()
     val uvs: ArrayList<Float> = ArrayList()
@@ -52,7 +57,8 @@ class Chunk(
     for (y in 0..<16) {
       for (z in 0..<16) {
         for (x in 0..<16) {
-          val index = y * 16 * 16 + z * 16 + x
+          val current = Vector3i(x, y, z)
+          val index = positionToIndex(current)
           val type = data[index]
           if (type == BlockType.AIR.id) {
             continue
@@ -64,47 +70,12 @@ class Chunk(
             this.z * 16 + z.toFloat()
           )
 
-          val topIndex = index + 16 * 16
-          if (y + 1 >= 16 || data[topIndex] == BlockType.AIR.id) {
-//          if (data[topIndex] == BlockType.AIR.id) {
-            appendData(positions, uvs, indices, offset, currentIndex, BlockFace.TOP)
-            currentIndex += 4
-          }
-
-          val bottomIndex = index - 16 * 16
-          if (y - 1 < 0 || data[bottomIndex] == BlockType.AIR.id) {
-//          if (data[bottomIndex] == BlockType.AIR.id) {
-            appendData(positions, uvs, indices, offset, currentIndex, BlockFace.BOTTOM)
-            currentIndex += 4
-          }
-
-          val eastIndex = index + 1
-          if (x + 1 >= 16 || data[eastIndex] == BlockType.AIR.id) {
-//          if (data[eastIndex] == BlockType.AIR.id) {
-            appendData(positions, uvs, indices, offset, currentIndex, BlockFace.EAST)
-            currentIndex += 4
-          }
-
-          val westIndex = index - 1
-          if (x - 1 < 0 || data[westIndex] == BlockType.AIR.id) {
-//          if (data[westIndex] == BlockType.AIR.id) {
-            appendData(positions, uvs, indices, offset, currentIndex, BlockFace.WEST)
-            currentIndex += 4
-          }
-
-          val northIndex = index - 16
-          if (z - 1 < 0 || data[northIndex] == BlockType.AIR.id) {
-//          if (data[northIndex] == BlockType.AIR.id) {
-            appendData(positions, uvs, indices, offset, currentIndex, BlockFace.NORTH)
-            currentIndex += 4
-          }
-
-          val southIndex = index + 16
-          if (z + 1 >= 16 || data[southIndex] == BlockType.AIR.id) {
-//          if (data[southIndex] == BlockType.AIR.id) {
-            appendData(positions, uvs, indices, offset, currentIndex, BlockFace.SOUTH)
-            currentIndex += 4
-          }
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.TOP);
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.BOTTOM);
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.EAST);
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.WEST);
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.NORTH);
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.SOUTH);
         }
       }
     }
@@ -121,14 +92,35 @@ class Chunk(
     positions: ArrayList<Float>,
     uvs: ArrayList<Float>,
     indices: ArrayList<Int>,
+    index: Vector3i,
     offset: Vector3f,
     currentIndex: Int,
     face: BlockFace
-  ) {
-    val (pos, uv, idx) = createFace(offset, currentIndex, face)
-    positions.addAll(pos)
-    uvs.addAll(uv)
-    indices.addAll(idx)
+  ): Int {
+    var drawFace = false
+    val neighbour = Vector3i(index).add(face.dir)
+
+    if (neighbour.x !in 0..<16) {
+      // TODO
+    } else if (neighbour.y !in 0..<16) {
+      // TODO
+    } else if (neighbour.z !in 0..<16) {
+      // TODO
+    } else {
+      val neighbourIndex = positionToIndex(neighbour);
+      drawFace = data[neighbourIndex] == BlockType.AIR.id
+    }
+
+    if (drawFace) {
+      val (pos, uv, idx) = createFace(offset, currentIndex, face)
+      positions.addAll(pos)
+      uvs.addAll(uv)
+      indices.addAll(idx)
+
+      return currentIndex + 4
+    }
+
+    return currentIndex
   }
 
   private fun createFace(
@@ -194,7 +186,7 @@ class Chunk(
 
       BlockFace.SOUTH -> arrayOf(
         0.5f + x, -0.5f + y, 0.5f + z, // bottom right
-        -0.5f + x, -0.5f + y, 0.5f + z, // botom left
+        -0.5f + x, -0.5f + y, 0.5f + z, // bottom left
         -0.5f + x, 0.5f + y, 0.5f + z, // top left
         0.5f + x, 0.5f + y, 0.5f + z, // top right
       )
