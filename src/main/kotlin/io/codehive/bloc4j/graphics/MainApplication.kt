@@ -52,7 +52,7 @@ class MainApplication : GraphicsApplication {
     shaderProgram.build()
     shaderProgram.use()
 
-    texture = Texture(gl, "/textures/dirt.png")
+    texture = Texture(gl, "/textures/atlas.png")
     texture.load()
   }
 

@@ -17,7 +17,7 @@ class Chunk(
 
   fun fill(type: BlockType) {
     for (i in data.indices) {
-      data[i] = type.id
+      data[i] = type.ordinal.toByte()
     }
   }
 
@@ -34,9 +34,9 @@ class Chunk(
                 this.z + z.toDouble() / 16,
           )
           if (value > 0) {
-            data[index] = BlockType.DIRT.id
+            data[index] = BlockType.DIRT.ordinal.toByte()
           } else {
-            data[index] = BlockType.AIR.id
+            data[index] = BlockType.AIR.ordinal.toByte()
           }
         }
       }
@@ -58,8 +58,8 @@ class Chunk(
         for (x in 0..<16) {
           val current = Vector3i(x, y, z)
           val index = positionToIndex(current)
-          val type = data[index]
-          if (type == BlockType.AIR.id) {
+          val type = BlockType.entries[data[index].toInt()]
+          if (type == BlockType.AIR) {
             continue
           }
 
@@ -69,12 +69,12 @@ class Chunk(
             this.z * 16 + z.toFloat()
           )
 
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.TOP);
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.BOTTOM);
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.EAST);
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.WEST);
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.NORTH);
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.SOUTH);
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.TOP, type)
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.BOTTOM, type)
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.EAST, type)
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.WEST, type)
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.NORTH, type)
+          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.SOUTH, type)
         }
       }
     }
@@ -94,7 +94,8 @@ class Chunk(
     index: Vector3i,
     offset: Vector3f,
     currentIndex: Int,
-    face: BlockFace
+    face: BlockFace,
+    type: BlockType
   ): Int {
     var drawFace = false
     val neighbour = Vector3i(index).add(face.dir)
@@ -110,11 +111,11 @@ class Chunk(
       drawFace = true
     } else {
       val neighbourIndex = positionToIndex(neighbour);
-      drawFace = data[neighbourIndex] == BlockType.AIR.id
+      drawFace = data[neighbourIndex].toInt() == BlockType.AIR.ordinal
     }
 
     if (drawFace) {
-      val (pos, uv, idx) = createFace(offset, currentIndex, face)
+      val (pos, uv, idx) = createFace(offset, currentIndex, face, type)
       positions.addAll(pos)
       uvs.addAll(uv)
       indices.addAll(idx)
@@ -128,7 +129,8 @@ class Chunk(
   private fun createFace(
     offsets: Vector3f,
     currentIndex: Int,
-    face: BlockFace
+    face: BlockFace,
+    type: BlockType
   ): Triple<Array<Float>, Array<Float>, Array<Int>> {
     val x = offsets.x
     val y = offsets.y
@@ -143,12 +145,7 @@ class Chunk(
       currentIndex + 0,
     )
 
-    val uvs = arrayOf(
-      0.0f, 0.0f,
-      1.0f, 0.0f,
-      1.0f, 1.0f,
-      0.0f, 1.0f,
-    )
+    val uvs = BlockType.uvFromType(type)
 
     val verts = when (face) {
       BlockFace.TOP -> arrayOf(
