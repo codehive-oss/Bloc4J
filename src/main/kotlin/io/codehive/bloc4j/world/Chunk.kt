@@ -1,8 +1,8 @@
 package io.codehive.bloc4j.world
 
 import com.jogamp.opengl.GL3
+import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator
 import io.codehive.bloc4j.graphics.lib.Mesh
-import main.ru.aengine.noise.NoiseGenerator
 import org.joml.Vector3f
 
 class Chunk(
@@ -22,16 +22,16 @@ class Chunk(
   }
 
   fun generate() {
-    val generator = NoiseGenerator()
+    val perlin = PerlinNoiseGenerator.newBuilder().setSeed(69420).build()
+
     for (y in 0..<16) {
       for (z in 0..<16) {
         for (x in 0..<16) {
           val index = y * 16 * 16 + z * 16 + x
-          val value = generator.noise(
-            (this.x * 16 + x).toDouble(),
-            (this.y * 16 + y).toDouble(),
-            (this.z * 16 + z).toDouble(),
-            35
+          val value = perlin.evaluateNoise(
+                this.x + x.toDouble() / 16,
+                this.y + y.toDouble() / 16,
+                this.z + z.toDouble() / 16,
           )
           if (value > 0) {
             data[index] = BlockType.DIRT.id

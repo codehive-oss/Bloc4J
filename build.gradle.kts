@@ -22,6 +22,7 @@ dependencies {
   implementation("org.joml:joml:1.10.5")
 
   implementation("commons-io:commons-io:2.15.1")
+  implementation("de.articdive:jnoise-pipeline:4.1.0")
 }
 
 application {
