@@ -6,17 +6,17 @@ import com.jogamp.opengl.util.GLBuffers
 import java.nio.IntBuffer
 
 class Mesh(
-  val gl: GL3,
-  positions: FloatArray,
-  uvCoords: FloatArray,
-  val indices: IntArray
+    private val gl: GL3,
+    positions: FloatArray,
+    uvCoords: FloatArray,
+    private val indices: IntArray
 ) {
 
-  val vao: IntBuffer = GLBuffers.newDirectIntBuffer(1)
-  val ebo: IntBuffer = GLBuffers.newDirectIntBuffer(1)
+  private val vao: IntBuffer = GLBuffers.newDirectIntBuffer(1)
+  private val ebo: IntBuffer = GLBuffers.newDirectIntBuffer(1)
 
-  val verticesBuffer: VertexBuffer = VertexBuffer(gl, positions, 3)
-  val uvBuffer: VertexBuffer = VertexBuffer(gl, uvCoords, 2)
+  private val verticesBuffer: VertexBuffer = VertexBuffer(gl, positions, 3)
+  private val uvBuffer: VertexBuffer = VertexBuffer(gl, uvCoords, 2)
 
   fun build() {
     gl.glGenVertexArrays(1, vao)

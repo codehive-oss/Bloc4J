@@ -12,9 +12,8 @@ class Chunk(
   val z: Int
 ) {
 
-  lateinit var mesh: Mesh
-
-  val data = ByteArray(16 * 16 * 16)
+  private lateinit var mesh: Mesh
+  private val data = ByteArray(16 * 16 * 16)
 
   fun fill(type: BlockType) {
     for (i in data.indices) {
@@ -44,7 +43,7 @@ class Chunk(
     }
   }
 
-  fun positionToIndex(pos: Vector3i): Int {
+  private fun positionToIndex(pos: Vector3i): Int {
     return pos.y * 16 * 16 + pos.z * 16 + pos.x
   }
 

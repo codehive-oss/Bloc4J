@@ -8,12 +8,11 @@ import com.jogamp.opengl.util.GLBuffers
 import java.nio.IntBuffer
 
 class VertexBuffer(
-  val gl: GL3,
-  val data: FloatArray,
-  val elementsPerVertex: Int,
+  private val gl: GL3,
+  private val data: FloatArray,
+  private val elementsPerVertex: Int,
 ) {
-
-  val vbo: IntBuffer = GLBuffers.newDirectIntBuffer(1)
+  private val vbo: IntBuffer = GLBuffers.newDirectIntBuffer(1)
 
   fun build(index: Int) {
     gl.glGenBuffers(1, vbo)

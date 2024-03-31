@@ -10,7 +10,7 @@ object MouseInput : MouseListener {
   var dx: Int = 400
   var dy: Int = 300
 
-  val robot = Robot()
+  private val robot = Robot()
 
   override fun mouseClicked(e: MouseEvent?) {
 
