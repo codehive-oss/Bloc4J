@@ -1,6 +1,7 @@
 package io.codehive.bloc4j.graphics.lib
 
 import com.jogamp.newt.event.KeyEvent
+import com.jogamp.newt.event.MouseEvent
 import com.jogamp.opengl.GL3
 import org.joml.Vector2i
 
@@ -12,6 +13,8 @@ interface GraphicsApplication {
   fun reshape(gl: GL3, dimensions: Vector2i)
 
   fun keyPressed(keyEvent: KeyEvent)
+
+  fun mouseMoved(mouseEvent: MouseEvent)
 
   fun end(gl: GL3)
 

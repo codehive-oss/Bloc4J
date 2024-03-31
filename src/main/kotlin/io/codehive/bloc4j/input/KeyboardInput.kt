@@ -1,4 +1,4 @@
-package io.codehive.input
+package io.codehive.bloc4j.input
 
 import com.jogamp.newt.event.KeyEvent
 import com.jogamp.newt.event.KeyListener
@@ -25,6 +25,7 @@ object KeyboardInput : KeyListener {
   }
 
   override fun keyReleased(e: KeyEvent) {
+    if (e.isAutoRepeat) return
     when (e.keyCode) {
       Config.MOVE_FORWARD_KEY -> movingForward = false
       Config.MOVE_BACKWARD_KEY -> movingBackwards = false

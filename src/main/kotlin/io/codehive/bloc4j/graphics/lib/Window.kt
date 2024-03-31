@@ -7,13 +7,14 @@ import com.jogamp.opengl.GLCapabilities
 import com.jogamp.opengl.GLEventListener
 import com.jogamp.opengl.GLProfile
 import com.jogamp.opengl.util.Animator
-import io.codehive.input.KeyboardInput
+import io.codehive.bloc4j.input.KeyboardInput
+import io.codehive.bloc4j.input.MouseInput
 import org.joml.Vector2i
 
 object Window : GLEventListener, KeyListener, MouseListener {
 
   private lateinit var application: GraphicsApplication
-  private lateinit var window: GLWindow
+  lateinit var window: GLWindow
 
   val width
     get() = window.width
@@ -36,12 +37,14 @@ object Window : GLEventListener, KeyListener, MouseListener {
       this.title = title
       setSize(initialSize.x, initialSize.y)
       isVisible = true
+      isPointerVisible = false
     }
 
     window.addGLEventListener(this)
     window.addKeyListener(this)
     window.addKeyListener(KeyboardInput)
     window.addMouseListener(this)
+    window.addMouseListener(MouseInput)
 
     val animator = Animator()
     animator.add(window)
@@ -83,6 +86,10 @@ object Window : GLEventListener, KeyListener, MouseListener {
     application.keyPressed(keyEvent)
   }
 
+  override fun mouseMoved(mouseEvent: MouseEvent) {
+    application.mouseMoved(mouseEvent)
+  }
+
   override fun dispose(glAutoDrawable: GLAutoDrawable) {
     val gl = glAutoDrawable.gl.gL3
     application.end(gl)
@@ -108,9 +115,6 @@ object Window : GLEventListener, KeyListener, MouseListener {
   }
 
   override fun mouseReleased(mouseEvent: MouseEvent) {
-  }
-
-  override fun mouseMoved(mouseEvent: MouseEvent) {
   }
 
   override fun mouseDragged(mouseEvent: MouseEvent) {

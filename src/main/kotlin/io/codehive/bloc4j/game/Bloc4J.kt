@@ -1,37 +1,66 @@
 package io.codehive.bloc4j.game
 
-import io.codehive.bloc4j.entitiy.Player
-import io.codehive.input.KeyboardInput
+import io.codehive.bloc4j.entity.Camera
+import io.codehive.bloc4j.entity.Player
+import io.codehive.bloc4j.input.KeyboardInput
+import org.joml.Math
+import org.joml.Vector3f
 
 object Bloc4J {
 
   val player: Player = Player()
-  var cameraEntity = player
+  var cameraEntity = Camera(player)
 
   fun update() {
     handleMovementInput()
+    handleCameraMovement()
   }
 
   private fun handleMovementInput() {
-    val movementDelta = 0.1
+    val cameraUp = Vector3f(0f, 1f, 0f)
+
+    var moveDir = Vector3f(0f, 0f, 0f)
     if (KeyboardInput.movingForward) {
-      player.location.z -= movementDelta
+      moveDir.add(cameraEntity.front)
+      moveDir.y = 0f
     }
     if (KeyboardInput.movingBackwards) {
-      player.location.z += movementDelta
+      moveDir.add(cameraEntity.front.mul(-1f))
+      moveDir.y = 0f
     }
     if (KeyboardInput.movingLeft) {
-      player.location.x -= movementDelta
+      moveDir.add(Vector3f(cameraEntity.front).cross(cameraUp).mul(-1f))
+      moveDir.y = 0f
     }
     if (KeyboardInput.movingRight) {
-      player.location.x += movementDelta
+      moveDir.add(Vector3f(cameraEntity.front).cross(cameraUp))
+      moveDir.y = 0f
     }
     if (KeyboardInput.movingUp) {
-      player.location.y += movementDelta
+      moveDir.add(Vector3f(0f, 1f, 0f))
     }
     if (KeyboardInput.movingDown) {
-      player.location.y -= movementDelta
+      moveDir.add(Vector3f(0f, -1f, 0f))
     }
+
+    if (moveDir.lengthSquared() < 0.001) {
+      return
+    }
+
+    val movementDelta = 0.05f
+    moveDir = moveDir.normalize().mul(movementDelta)
+
+    player.location.add(moveDir)
   }
 
+  private fun handleCameraMovement() {
+    // val cameraDelta = 0.01f
+    // cameraEntity.target.rotation.yaw -= MouseInput.dx * cameraDelta
+    // cameraEntity.target.rotation.pitch += MouseInput.dy * cameraDelta
+
+    cameraEntity.target.rotation.pitch =
+      Math.clamp(-89f, 89f, cameraEntity.target.rotation.pitch)
+
+    cameraEntity.updateFront()
+  }
 }
