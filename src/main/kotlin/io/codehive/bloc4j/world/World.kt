@@ -5,13 +5,12 @@ import org.joml.Vector3i
 import kotlin.math.floor
 
 class World {
-
-  val chunks: ArrayList<Chunk> = ArrayList()
+  private val chunks: ArrayList<Chunk> = ArrayList()
 
   init {
-    for (x in -1..1) {
-      for (y in -1..1) {
-        for (z in -1..1) {
+    for (x in -2..1) {
+      for (y in -2..1) {
+        for (z in -2..1) {
           val chunk = Chunk(this, x, y, z)
           chunk.fill(BlockType.DIRT)
           chunks.add(chunk)
@@ -20,7 +19,7 @@ class World {
     }
   }
 
-  fun getChunkAt(x: Int, y: Int, z: Int): Chunk? {
+  private fun getChunkAt(x: Int, y: Int, z: Int): Chunk? {
     return chunks.find { chunk -> chunk.x == x && chunk.y == y && chunk.z == z }
   }
 

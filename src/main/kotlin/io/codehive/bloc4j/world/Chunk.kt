@@ -7,7 +7,7 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 
 class Chunk(
-  val world: World,
+  private val world: World,
   val x: Int,
   val y: Int,
   val z: Int
@@ -135,7 +135,11 @@ class Chunk(
     val neighbour: BlockType
     val neighbourPos = Vector3i(index).add(face.dir)
     val neighbourPosGlobal =
-      Vector3i(this.x * 16 + neighbourPos.x, this.y * 16 + neighbourPos.y, this.z + neighbourPos.z)
+      Vector3i(
+        this.x * 16 + neighbourPos.x,
+        this.y * 16 + neighbourPos.y,
+        this.z * 16 + neighbourPos.z,
+      )
 
     if (neighbourPos.x !in 0..<16 || neighbourPos.y !in 0..<16 || neighbourPos.z !in 0..<16) {
       neighbour = world.getBlockAtSafe(neighbourPosGlobal)
