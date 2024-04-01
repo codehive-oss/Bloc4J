@@ -5,22 +5,24 @@ import org.joml.Vector3i
 import kotlin.math.floor
 
 class World {
-  private val chunks: ArrayList<Chunk> = ArrayList()
+  private val chunks: HashMap<Vector3i, Chunk>  = HashMap()
 
   init {
     for (x in -2..1) {
       for (y in -2..1) {
         for (z in -2..1) {
-          val chunk = Chunk(this, x, y, z)
-          chunk.fill(BlockType.DIRT)
-          chunks.add(chunk)
+          val coords = Vector3i(x, y, z)
+          val chunk = Chunk(this, coords)
+//          chunk.fill(BlockType.DIRT)
+          chunk.generate()
+          chunks[coords] = chunk
         }
       }
     }
   }
 
   private fun getChunkAt(x: Int, y: Int, z: Int): Chunk? {
-    return chunks.find { chunk -> chunk.x == x && chunk.y == y && chunk.z == z }
+    return chunks[Vector3i(x, y, z)]
   }
 
   fun getBlockAtSafe(pos: Vector3i): BlockType {
@@ -41,13 +43,13 @@ class World {
   }
 
   fun buildChunks(gl: GL3) {
-    for (chunk in chunks) {
+    for ((_, chunk) in chunks) {
       chunk.recalculate(gl)
     }
   }
 
   fun render() {
-    for (chunk in chunks) {
+    for ((_, chunk) in chunks) {
       chunk.render()
     }
   }

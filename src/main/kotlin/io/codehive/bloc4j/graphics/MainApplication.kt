@@ -28,8 +28,8 @@ class MainApplication : GraphicsApplication {
 
     world.buildChunks(gl)
 
-//    gl.glEnable(GL_CULL_FACE)
-//    gl.glCullFace(GL_FRONT)
+    gl.glEnable(GL_CULL_FACE)
+    gl.glCullFace(GL_FRONT)
 
     shaderProgram = ShaderProgram(gl, "/shader.vert", "/shader.frag")
     shaderProgram.build()

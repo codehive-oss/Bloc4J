@@ -8,9 +8,7 @@ import org.joml.Vector3i
 
 class Chunk(
   private val world: World,
-  val x: Int,
-  val y: Int,
-  val z: Int
+  private val coords: Vector3i
 ) {
 
   private lateinit var mesh: Mesh
@@ -30,9 +28,9 @@ class Chunk(
         for (x in 0..<16) {
           val index = y * 16 * 16 + z * 16 + x
           val value = perlin.evaluateNoise(
-            this.x + x.toDouble() / 16,
-            this.y + y.toDouble() / 16,
-            this.z + z.toDouble() / 16,
+            this.coords.x + x.toDouble() / 16,
+            this.coords.y + y.toDouble() / 16,
+            this.coords.z + z.toDouble() / 16,
           )
           if (value > 0) {
             data[index] = BlockType.DIRT.ordinal.toByte()
@@ -67,11 +65,10 @@ class Chunk(
           if (type == BlockType.AIR) {
             continue
           }
-
           val offset = Vector3f(
-            this.x * 16 + x.toFloat(),
-            this.y * 16 + y.toFloat(),
-            this.z * 16 + z.toFloat()
+            this.coords.x * 16 + x.toFloat(),
+            this.coords.y * 16 + y.toFloat(),
+            this.coords.z * 16 + z.toFloat()
           )
 
           currentIndex =
@@ -136,9 +133,9 @@ class Chunk(
     val neighbourPos = Vector3i(index).add(face.dir)
     val neighbourPosGlobal =
       Vector3i(
-        this.x * 16 + neighbourPos.x,
-        this.y * 16 + neighbourPos.y,
-        this.z * 16 + neighbourPos.z,
+        this.coords.x * 16 + neighbourPos.x,
+        this.coords.y * 16 + neighbourPos.y,
+        this.coords.z * 16 + neighbourPos.z,
       )
 
     if (neighbourPos.x !in 0..<16 || neighbourPos.y !in 0..<16 || neighbourPos.z !in 0..<16) {
