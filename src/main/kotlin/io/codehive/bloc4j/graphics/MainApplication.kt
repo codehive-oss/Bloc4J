@@ -9,10 +9,11 @@ import io.codehive.bloc4j.graphics.lib.GraphicsApplication
 import io.codehive.bloc4j.graphics.lib.ShaderProgram
 import io.codehive.bloc4j.graphics.lib.Texture
 import io.codehive.bloc4j.graphics.lib.Window
-import io.codehive.bloc4j.world.Chunk
+import io.codehive.bloc4j.world.World
 import org.joml.Matrix4f
 import org.joml.Vector2i
 import org.joml.Vector3f
+import org.joml.Vector3i
 
 class MainApplication : GraphicsApplication {
   private var shouldQuit = false
@@ -20,33 +21,15 @@ class MainApplication : GraphicsApplication {
   private lateinit var shaderProgram: ShaderProgram
   private lateinit var texture: Texture
 
-  var chunks: Array<Chunk> = Array(27) {
-    Chunk(0, 0, 0)
-  }
-
-  init {
-
-    var i = 0
-    for (x in -1..1) {
-      for (y in -1..1) {
-        for (z in -1..1) {
-          chunks[i] = Chunk(x, y, z)
-          chunks[i].generate()
-          i++
-        }
-      }
-    }
-  }
+  var world: World = World()
 
   override fun init(gl: GL3) {
     gl.glEnable(GL_DEPTH_TEST)
 
-    for (chunk in chunks) {
-      chunk.recalculate(gl)
-    }
+    world.buildChunks(gl)
 
-    gl.glEnable(GL_CULL_FACE)
-    gl.glCullFace(GL_FRONT)
+//    gl.glEnable(GL_CULL_FACE)
+//    gl.glCullFace(GL_FRONT)
 
     shaderProgram = ShaderProgram(gl, "/shader.vert", "/shader.frag")
     shaderProgram.build()
@@ -94,9 +77,7 @@ class MainApplication : GraphicsApplication {
     shaderProgram.setMat4f("projection", projection)
     shaderProgram.setMat4f("model", model)
 
-    for (chunk in chunks) {
-      chunk.render()
-    }
+    world.render()
   }
 
   override fun reshape(gl: GL3, dimensions: Vector2i) {

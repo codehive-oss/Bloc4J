@@ -7,6 +7,7 @@ import org.joml.Vector3f
 import org.joml.Vector3i
 
 class Chunk(
+  val world: World,
   val x: Int,
   val y: Int,
   val z: Int
@@ -29,9 +30,9 @@ class Chunk(
         for (x in 0..<16) {
           val index = y * 16 * 16 + z * 16 + x
           val value = perlin.evaluateNoise(
-                this.x + x.toDouble() / 16,
-                this.y + y.toDouble() / 16,
-                this.z + z.toDouble() / 16,
+            this.x + x.toDouble() / 16,
+            this.y + y.toDouble() / 16,
+            this.z + z.toDouble() / 16,
           )
           if (value > 0) {
             data[index] = BlockType.DIRT.ordinal.toByte()
@@ -45,6 +46,10 @@ class Chunk(
 
   private fun positionToIndex(pos: Vector3i): Int {
     return pos.y * 16 * 16 + pos.z * 16 + pos.x
+  }
+
+  fun getBlockAt(localX: Int, localY: Int, localZ: Int): BlockType {
+    return BlockType.entries[data[positionToIndex(Vector3i(localX, localY, localZ))].toInt()]
   }
 
   fun recalculate(gl: GL3) {
@@ -69,12 +74,42 @@ class Chunk(
             this.z * 16 + z.toFloat()
           )
 
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.TOP, type)
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.BOTTOM, type)
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.EAST, type)
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.WEST, type)
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.NORTH, type)
-          currentIndex = appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.SOUTH, type)
+          currentIndex =
+            appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.TOP, type)
+          currentIndex = appendData(
+            positions,
+            uvs,
+            indices,
+            current,
+            offset,
+            currentIndex,
+            BlockFace.BOTTOM,
+            type
+          )
+          currentIndex =
+            appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.EAST, type)
+          currentIndex =
+            appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.WEST, type)
+          currentIndex = appendData(
+            positions,
+            uvs,
+            indices,
+            current,
+            offset,
+            currentIndex,
+            BlockFace.NORTH,
+            type
+          )
+          currentIndex = appendData(
+            positions,
+            uvs,
+            indices,
+            current,
+            offset,
+            currentIndex,
+            BlockFace.SOUTH,
+            type
+          )
         }
       }
     }
@@ -99,16 +134,11 @@ class Chunk(
   ): Int {
     val neighbour: BlockType
     val neighbourPos = Vector3i(index).add(face.dir)
+    val neighbourPosGlobal =
+      Vector3i(this.x * 16 + neighbourPos.x, this.y * 16 + neighbourPos.y, this.z + neighbourPos.z)
 
-    if (neighbourPos.x !in 0..<16) {
-      // TODO
-      neighbour = BlockType.AIR
-    } else if (neighbourPos.y !in 0..<16) {
-      // TODO
-      neighbour = BlockType.AIR
-    } else if (neighbourPos.z !in 0..<16) {
-      // TODO
-      neighbour = BlockType.AIR
+    if (neighbourPos.x !in 0..<16 || neighbourPos.y !in 0..<16 || neighbourPos.z !in 0..<16) {
+      neighbour = world.getBlockAtSafe(neighbourPosGlobal)
     } else {
       val neighbourIndex = positionToIndex(neighbourPos)
       neighbour = BlockType.entries[data[neighbourIndex].toInt()]
