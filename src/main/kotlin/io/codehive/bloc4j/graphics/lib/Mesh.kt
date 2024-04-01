@@ -6,17 +6,19 @@ import com.jogamp.opengl.util.GLBuffers
 import java.nio.IntBuffer
 
 class Mesh(
-    private val gl: GL3,
-    positions: FloatArray,
-    uvCoords: FloatArray,
-    private val indices: IntArray
+  private val gl: GL3,
+  positions: FloatArray,
+  uvCoords: FloatArray,
+  normals: FloatArray,
+  private val indices: IntArray
 ) {
 
   private val vao: IntBuffer = GLBuffers.newDirectIntBuffer(1)
   private val ebo: IntBuffer = GLBuffers.newDirectIntBuffer(1)
 
-  private val verticesBuffer: VertexBuffer = VertexBuffer(gl, positions, 3)
-  private val uvBuffer: VertexBuffer = VertexBuffer(gl, uvCoords, 2)
+  private val verticesBuffer = VertexBuffer(gl, positions, 3)
+  private val uvBuffer = VertexBuffer(gl, uvCoords, 2)
+  private val normals = VertexBuffer(gl, normals, 3)
 
   fun build() {
     gl.glGenVertexArrays(1, vao)
@@ -32,6 +34,7 @@ class Mesh(
 
     verticesBuffer.build(0)
     uvBuffer.build(1)
+    normals.build(2)
   }
 
   fun render() {

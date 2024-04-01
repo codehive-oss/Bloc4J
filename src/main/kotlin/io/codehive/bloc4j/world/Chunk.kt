@@ -8,8 +8,10 @@ import org.joml.Vector3i
 
 class Chunk(
   private val world: World,
-  private val coords: Vector3i
+  val coords: Vector3i
 ) {
+
+  var dirty = true
 
   private lateinit var mesh: Mesh
   private val data = ByteArray(16 * 16 * 16)
@@ -20,7 +22,7 @@ class Chunk(
     }
   }
 
-  fun generate() {
+  fun generate(type: BlockType) {
     val perlin = PerlinNoiseGenerator.newBuilder().setSeed(69420).build()
 
     for (y in 0..<16) {
@@ -33,7 +35,7 @@ class Chunk(
             this.coords.z + z.toDouble() / 16,
           )
           if (value > 0) {
-            data[index] = BlockType.DIRT.ordinal.toByte()
+            data[index] = type.ordinal.toByte()
           } else {
             data[index] = BlockType.AIR.ordinal.toByte()
           }
@@ -54,6 +56,7 @@ class Chunk(
     val positions: ArrayList<Float> = ArrayList()
     val uvs: ArrayList<Float> = ArrayList()
     val indices: ArrayList<Int> = ArrayList()
+    val normals: ArrayList<Float> = ArrayList()
     var currentIndex = 0
 
     for (y in 0..<16) {
@@ -72,11 +75,21 @@ class Chunk(
           )
 
           currentIndex =
-            appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.TOP, type)
+            appendData(
+              positions,
+              uvs,
+              indices,
+              normals,
+              current,
+              offset,
+              currentIndex,
+              BlockFace.TOP,
+              type
+            )
           currentIndex = appendData(
             positions,
             uvs,
-            indices,
+            indices, normals,
             current,
             offset,
             currentIndex,
@@ -84,13 +97,33 @@ class Chunk(
             type
           )
           currentIndex =
-            appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.EAST, type)
+            appendData(
+              positions,
+              uvs,
+              indices,
+              normals,
+              current,
+              offset,
+              currentIndex,
+              BlockFace.EAST,
+              type
+            )
           currentIndex =
-            appendData(positions, uvs, indices, current, offset, currentIndex, BlockFace.WEST, type)
+            appendData(
+              positions,
+              uvs,
+              indices,
+              normals,
+              current,
+              offset,
+              currentIndex,
+              BlockFace.WEST,
+              type
+            )
           currentIndex = appendData(
             positions,
             uvs,
-            indices,
+            indices, normals,
             current,
             offset,
             currentIndex,
@@ -100,7 +133,7 @@ class Chunk(
           currentIndex = appendData(
             positions,
             uvs,
-            indices,
+            indices, normals,
             current,
             offset,
             currentIndex,
@@ -111,11 +144,21 @@ class Chunk(
       }
     }
 
-    mesh = Mesh(gl, positions.toFloatArray(), uvs.toFloatArray(), indices.toIntArray())
+    mesh = Mesh(
+      gl,
+      positions.toFloatArray(),
+      uvs.toFloatArray(),
+      normals.toFloatArray(),
+      indices.toIntArray(),
+    )
     mesh.build()
+    dirty = false
   }
 
-  fun render() {
+  fun render(gl: GL3) {
+    if (dirty) {
+      recalculate(gl)
+    }
     mesh.render()
   }
 
@@ -123,6 +166,7 @@ class Chunk(
     positions: ArrayList<Float>,
     uvs: ArrayList<Float>,
     indices: ArrayList<Int>,
+    normals: ArrayList<Float>,
     index: Vector3i,
     offset: Vector3f,
     currentIndex: Int,
@@ -147,10 +191,16 @@ class Chunk(
 
     // Add more like GLASS etc...
     if (neighbour == BlockType.AIR) {
-      val (pos, uv, idx) = createFace(offset, currentIndex, face, type)
-      positions.addAll(pos)
-      uvs.addAll(uv)
-      indices.addAll(idx)
+      createFace(
+        positions,
+        uvs,
+        normals,
+        indices,
+        offset,
+        currentIndex,
+        face,
+        type
+      )
 
       return currentIndex + 4
     }
@@ -159,27 +209,20 @@ class Chunk(
   }
 
   private fun createFace(
+    positions: ArrayList<Float>,
+    uvs: ArrayList<Float>,
+    normals: ArrayList<Float>,
+    indices: ArrayList<Int>,
     offsets: Vector3f,
     currentIndex: Int,
     face: BlockFace,
     type: BlockType
-  ): Triple<Array<Float>, Array<Float>, Array<Int>> {
+  ) {
     val x = offsets.x
     val y = offsets.y
     val z = offsets.z
 
-    val idxs = arrayOf(
-      currentIndex + 0,
-      currentIndex + 1,
-      currentIndex + 2,
-      currentIndex + 2,
-      currentIndex + 3,
-      currentIndex + 0,
-    )
-
-    val uvs = BlockType.uvFromType(type)
-
-    val verts = when (face) {
+    val newPositions = when (face) {
       BlockFace.TOP -> arrayOf(
         0.5f + x, 0.5f + y, 0.5f + z, // bottom right
         -0.5f + x, 0.5f + y, 0.5f + z, // bottom left
@@ -223,6 +266,38 @@ class Chunk(
       )
     }
 
-    return Triple(verts, uvs, idxs)
+    val newUvs = BlockType.uvFromType(type)
+
+    val newNormals = arrayOf(
+      face.dir.x.toFloat(),
+      face.dir.y.toFloat(),
+      face.dir.z.toFloat(),
+
+      face.dir.x.toFloat(),
+      face.dir.y.toFloat(),
+      face.dir.z.toFloat(),
+
+      face.dir.x.toFloat(),
+      face.dir.y.toFloat(),
+      face.dir.z.toFloat(),
+
+      face.dir.x.toFloat(),
+      face.dir.y.toFloat(),
+      face.dir.z.toFloat(),
+    )
+
+    val newIndices = arrayOf(
+      currentIndex + 0,
+      currentIndex + 1,
+      currentIndex + 2,
+      currentIndex + 2,
+      currentIndex + 3,
+      currentIndex + 0,
+    )
+
+    positions.addAll(newPositions)
+    uvs.addAll(newUvs)
+    normals.addAll(newNormals)
+    indices.addAll(newIndices)
   }
 }

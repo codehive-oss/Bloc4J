@@ -13,5 +13,5 @@ object Config {
   const val MOVE_UP_KEY = KeyEvent.VK_SPACE
   const val MOVE_DOWN_KEY = KeyEvent.VK_SHIFT
 
-
+  const val RENDER_DISTANCE = 5
 }

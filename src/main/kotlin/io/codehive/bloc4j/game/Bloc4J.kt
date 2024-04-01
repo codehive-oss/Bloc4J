@@ -3,17 +3,20 @@ package io.codehive.bloc4j.game
 import io.codehive.bloc4j.entity.Camera
 import io.codehive.bloc4j.entity.Player
 import io.codehive.bloc4j.input.KeyboardInput
+import io.codehive.bloc4j.world.World
 import org.joml.Math
 import org.joml.Vector3f
 
 object Bloc4J {
 
-  val player: Player = Player()
+  val player = Player()
+  val world = World()
   var cameraEntity = Camera(player)
 
   fun update() {
     handleMovementInput()
     handleCameraMovement()
+    world.loadChunksAroundPoint(player.location.toVec3f())
   }
 
   private fun handleMovementInput() {

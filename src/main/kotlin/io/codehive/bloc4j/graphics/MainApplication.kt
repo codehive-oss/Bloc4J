@@ -21,12 +21,10 @@ class MainApplication : GraphicsApplication {
   private lateinit var shaderProgram: ShaderProgram
   private lateinit var texture: Texture
 
-  var world: World = World()
+  var world: World = Bloc4J.world
 
   override fun init(gl: GL3) {
     gl.glEnable(GL_DEPTH_TEST)
-
-    world.buildChunks(gl)
 
     gl.glEnable(GL_CULL_FACE)
     gl.glCullFace(GL_FRONT)
@@ -77,7 +75,7 @@ class MainApplication : GraphicsApplication {
     shaderProgram.setMat4f("projection", projection)
     shaderProgram.setMat4f("model", model)
 
-    world.render()
+    world.render(gl)
   }
 
   override fun reshape(gl: GL3, dimensions: Vector2i) {

@@ -1,11 +1,13 @@
 package io.codehive.bloc4j.world
 
 import com.jogamp.opengl.GL3
+import io.codehive.bloc4j.game.Config
+import org.joml.Vector3f
 import org.joml.Vector3i
 import kotlin.math.floor
 
 class World {
-  private val chunks: HashMap<Vector3i, Chunk>  = HashMap()
+  private val chunks: HashMap<Vector3i, Chunk> = HashMap()
 
   init {
     for (x in -2..1) {
@@ -14,22 +16,22 @@ class World {
           val coords = Vector3i(x, y, z)
           val chunk = Chunk(this, coords)
 //          chunk.fill(BlockType.DIRT)
-          chunk.generate()
+          chunk.generate(BlockType.STONE)
           chunks[coords] = chunk
         }
       }
     }
   }
 
-  private fun getChunkAt(x: Int, y: Int, z: Int): Chunk? {
-    return chunks[Vector3i(x, y, z)]
+  private fun getChunkAt(coords: Vector3i): Chunk? {
+    return chunks[coords]
   }
 
   fun getBlockAtSafe(pos: Vector3i): BlockType {
     val chunkX = floor(pos.x.toFloat() / 16).toInt()
     val chunkY = floor(pos.y.toFloat() / 16).toInt()
     val chunkZ = floor(pos.z.toFloat() / 16).toInt()
-    val chunk = getChunkAt(chunkX, chunkY, chunkZ) ?: return BlockType.AIR
+    val chunk = getChunkAt(Vector3i(chunkX, chunkY, chunkZ)) ?: return BlockType.AIR
 
     val localX = (pos.x % 16 + 16) % 16
     val localY = (pos.y % 16 + 16) % 16
@@ -48,10 +50,54 @@ class World {
     }
   }
 
-  fun render() {
-    for ((_, chunk) in chunks) {
-      chunk.render()
+  fun loadChunksAroundPoint(point: Vector3f) {
+    val chunkX = floor(point.x / 16).toInt()
+    val chunkY = floor(point.y / 16).toInt()
+    val chunkZ = floor(point.z / 16).toInt()
+
+    val toBeRendered: MutableSet<Chunk> = mutableSetOf()
+
+    for (y in -Config.RENDER_DISTANCE..Config.RENDER_DISTANCE) {
+      for (z in -Config.RENDER_DISTANCE..Config.RENDER_DISTANCE) {
+        for (x in -Config.RENDER_DISTANCE..Config.RENDER_DISTANCE) {
+          val coord = Vector3i(chunkX + x, chunkY + y, chunkZ + z)
+          if (Vector3f(
+              x.toFloat(),
+              y.toFloat(),
+              z.toFloat()
+            ).distanceSquared(Vector3f()) < Config.RENDER_DISTANCE * Config.RENDER_DISTANCE
+          ) {
+            val chunk = getChunkAt(coord) ?: Chunk(this, coord)
+            toBeRendered.add(chunk)
+          }
+        }
+      }
+    }
+
+    val toBeUnloaded = chunks.values.toSet().minus(toBeRendered)
+    for (chunk in toBeUnloaded) {
+      unloadChunk(chunk)
+    }
+
+    val toBeLoaded = toBeRendered.minus(chunks.values.toSet())
+    for (chunk in toBeLoaded) {
+      loadChunk(chunk)
     }
   }
 
+  private fun loadChunk(chunk: Chunk) {
+    chunks[chunk.coords] = chunk
+    chunk.dirty = true
+    chunk.generate(BlockType.STONE)
+  }
+
+  private fun unloadChunk(chunk: Chunk) {
+    chunks.remove(chunk.coords)
+  }
+
+  fun render(gl: GL3) {
+    for ((_, chunk) in chunks) {
+      chunk.render(gl)
+    }
+  }
 }
