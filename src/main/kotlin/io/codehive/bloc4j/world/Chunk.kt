@@ -2,6 +2,7 @@ package io.codehive.bloc4j.world
 
 import com.jogamp.opengl.GL3
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator
+import io.codehive.bloc4j.game.Bloc4J
 import io.codehive.bloc4j.graphics.lib.Mesh
 import org.joml.Vector3f
 import org.joml.Vector3i
@@ -50,6 +51,10 @@ class Chunk(
 
   fun getBlockAt(localX: Int, localY: Int, localZ: Int): BlockType {
     return BlockType.entries[data[positionToIndex(Vector3i(localX, localY, localZ))].toInt()]
+  }
+
+  fun distanceFromPlayer(): Int {
+    return Vector3i(coords).mul(16).distanceSquared(Bloc4J.player.location.toVec3i()).toInt()
   }
 
   fun recalculate(gl: GL3) {
@@ -155,11 +160,10 @@ class Chunk(
     dirty = false
   }
 
-  fun render(gl: GL3) {
-    if (dirty) {
-      recalculate(gl)
+  fun render() {
+    if(!dirty) {
+      mesh.render()
     }
-    mesh.render()
   }
 
   private fun appendData(

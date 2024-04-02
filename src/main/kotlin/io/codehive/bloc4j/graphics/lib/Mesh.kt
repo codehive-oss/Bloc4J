@@ -16,7 +16,7 @@ class Mesh(
   private val vao: IntBuffer = GLBuffers.newDirectIntBuffer(1)
   private val ebo: IntBuffer = GLBuffers.newDirectIntBuffer(1)
 
-  private val verticesBuffer = VertexBuffer(gl, positions, 3)
+  private val positionsBuffer = VertexBuffer(gl, positions, 3)
   private val uvBuffer = VertexBuffer(gl, uvCoords, 2)
   private val normals = VertexBuffer(gl, normals, 3)
 
@@ -32,7 +32,7 @@ class Mesh(
       indicesBuffer, GL.GL_STATIC_DRAW
     )
 
-    verticesBuffer.build(0)
+    positionsBuffer.build(0)
     uvBuffer.build(1)
     normals.build(2)
   }

@@ -4,24 +4,28 @@ import com.jogamp.opengl.GL3
 import io.codehive.bloc4j.game.Config
 import org.joml.Vector3f
 import org.joml.Vector3i
+import java.util.*
 import kotlin.math.floor
 
 class World {
+
+  private val chunkBakeQueue: PriorityQueue<Chunk> =
+    PriorityQueue(Comparator.comparing(Chunk::distanceFromPlayer))
   private val chunks: HashMap<Vector3i, Chunk> = HashMap()
 
-  init {
-    for (x in -2..1) {
-      for (y in -2..1) {
-        for (z in -2..1) {
-          val coords = Vector3i(x, y, z)
-          val chunk = Chunk(this, coords)
-//          chunk.fill(BlockType.DIRT)
-          chunk.generate(BlockType.STONE)
-          chunks[coords] = chunk
-        }
-      }
-    }
-  }
+//  init {
+//    for (x in -2..1) {
+//      for (y in -2..1) {
+//        for (z in -2..1) {
+//          val coords = Vector3i(x, y, z)
+//          val chunk = Chunk(this, coords)
+////          chunk.fill(BlockType.DIRT)
+//          chunk.generate(BlockType.STONE)
+//          chunks[coords] = chunk
+//        }
+//      }
+//    }
+//  }
 
   private fun getChunkAt(coords: Vector3i): Chunk? {
     return chunks[coords]
@@ -65,7 +69,7 @@ class World {
               x.toFloat(),
               y.toFloat(),
               z.toFloat()
-            ).distanceSquared(Vector3f()) < Config.RENDER_DISTANCE * Config.RENDER_DISTANCE
+            ).lengthSquared() < Config.RENDER_DISTANCE * Config.RENDER_DISTANCE
           ) {
             val chunk = getChunkAt(coord) ?: Chunk(this, coord)
             toBeRendered.add(chunk)
@@ -85,9 +89,17 @@ class World {
     }
   }
 
+  fun renderPendingChunks(gl: GL3) {
+    var chunk = chunkBakeQueue.poll() ?: return
+    while (!chunk.dirty && chunkBakeQueue.isEmpty()) {
+      chunk = chunkBakeQueue.poll()
+    }
+    chunk.recalculate(gl)
+  }
+
   private fun loadChunk(chunk: Chunk) {
     chunks[chunk.coords] = chunk
-    chunk.dirty = true
+    chunkBakeQueue.add(chunk)
     chunk.generate(BlockType.STONE)
   }
 
@@ -95,9 +107,9 @@ class World {
     chunks.remove(chunk.coords)
   }
 
-  fun render(gl: GL3) {
+  fun render() {
     for ((_, chunk) in chunks) {
-      chunk.render(gl)
+      chunk.render()
     }
   }
 }

@@ -13,7 +13,6 @@ import io.codehive.bloc4j.world.World
 import org.joml.Matrix4f
 import org.joml.Vector2i
 import org.joml.Vector3f
-import org.joml.Vector3i
 
 class MainApplication : GraphicsApplication {
   private var shouldQuit = false
@@ -38,14 +37,14 @@ class MainApplication : GraphicsApplication {
   }
 
   override fun display(gl: GL3, frame: Int) {
-    Bloc4J.update()
+    Bloc4J.update(gl)
 
     gl.glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
     gl.glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
     texture.bind(GL_TEXTURE_2D)
 
-    val model = Matrix4f()
+    val model = Matrix4f().scale(2f)
 
     val cameraLoc = Bloc4J.cameraEntity.target.location
 
@@ -75,7 +74,7 @@ class MainApplication : GraphicsApplication {
     shaderProgram.setMat4f("projection", projection)
     shaderProgram.setMat4f("model", model)
 
-    world.render(gl)
+    world.render()
   }
 
   override fun reshape(gl: GL3, dimensions: Vector2i) {

@@ -1,6 +1,7 @@
 package io.codehive.bloc4j.world
 
 import org.joml.Vector3f
+import org.joml.Vector3i
 
 class Location(
   var x: Float,
@@ -9,6 +10,10 @@ class Location(
 ) {
   fun toVec3f(): Vector3f {
     return Vector3f(x, y, z)
+  }
+
+  fun toVec3i(): Vector3i {
+    return Vector3i(x.toInt(), y.toInt(), z.toInt())
   }
 
   fun add(vector: Vector3f) {

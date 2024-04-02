@@ -1,5 +1,6 @@
 package io.codehive.bloc4j.game
 
+import com.jogamp.opengl.GL3
 import io.codehive.bloc4j.entity.Camera
 import io.codehive.bloc4j.entity.Player
 import io.codehive.bloc4j.input.KeyboardInput
@@ -13,10 +14,11 @@ object Bloc4J {
   val world = World()
   var cameraEntity = Camera(player)
 
-  fun update() {
+  fun update(gl: GL3) {
     handleMovementInput()
     handleCameraMovement()
     world.loadChunksAroundPoint(player.location.toVec3f())
+    world.renderPendingChunks(gl)
   }
 
   private fun handleMovementInput() {
@@ -50,7 +52,7 @@ object Bloc4J {
       return
     }
 
-    val movementDelta = 0.05f
+    val movementDelta = 0.2f
     moveDir = moveDir.normalize().mul(movementDelta)
 
     player.location.add(moveDir)
