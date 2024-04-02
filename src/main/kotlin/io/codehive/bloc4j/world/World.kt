@@ -10,7 +10,7 @@ import kotlin.math.floor
 class World {
 
   private val chunkBakeQueue: PriorityQueue<Chunk> =
-    PriorityQueue(Comparator.comparing(Chunk::distanceFromPlayer).reversed())
+    PriorityQueue(Comparator.comparing(Chunk::distanceFromPlayer))
   private val chunks: HashMap<Vector3i, Chunk> = HashMap()
 
   private fun getChunkAt(coords: Vector3i): Chunk? {
