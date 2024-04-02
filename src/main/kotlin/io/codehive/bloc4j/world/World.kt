@@ -10,22 +10,8 @@ import kotlin.math.floor
 class World {
 
   private val chunkBakeQueue: PriorityQueue<Chunk> =
-    PriorityQueue(Comparator.comparing(Chunk::distanceFromPlayer))
+    PriorityQueue(Comparator.comparing(Chunk::distanceFromPlayer).reversed())
   private val chunks: HashMap<Vector3i, Chunk> = HashMap()
-
-//  init {
-//    for (x in -2..1) {
-//      for (y in -2..1) {
-//        for (z in -2..1) {
-//          val coords = Vector3i(x, y, z)
-//          val chunk = Chunk(this, coords)
-////          chunk.fill(BlockType.DIRT)
-//          chunk.generate(BlockType.STONE)
-//          chunks[coords] = chunk
-//        }
-//      }
-//    }
-//  }
 
   private fun getChunkAt(coords: Vector3i): Chunk? {
     return chunks[coords]
@@ -46,12 +32,6 @@ class World {
       localY,
       localZ
     )
-  }
-
-  fun buildChunks(gl: GL3) {
-    for ((_, chunk) in chunks) {
-      chunk.recalculate(gl)
-    }
   }
 
   fun loadChunksAroundPoint(point: Vector3f) {
@@ -89,12 +69,13 @@ class World {
     }
   }
 
-  fun renderPendingChunks(gl: GL3) {
-    var chunk = chunkBakeQueue.poll() ?: return
-    while (!chunk.dirty && chunkBakeQueue.isEmpty()) {
-      chunk = chunkBakeQueue.poll()
+  fun renderPendingChunks(gl: GL3, maxTimeMillis: Long) {
+    val startTime = System.currentTimeMillis()
+    while (!chunkBakeQueue.isEmpty() && System.currentTimeMillis() - startTime < maxTimeMillis) {
+      val chunk = chunkBakeQueue.poll()
+      if (!chunk.dirty) continue
+      chunk.recalculate(gl)
     }
-    chunk.recalculate(gl)
   }
 
   private fun loadChunk(chunk: Chunk) {

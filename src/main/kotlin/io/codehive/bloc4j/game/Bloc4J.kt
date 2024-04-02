@@ -18,7 +18,7 @@ object Bloc4J {
     handleMovementInput()
     handleCameraMovement()
     world.loadChunksAroundPoint(player.location.toVec3f())
-    world.renderPendingChunks(gl)
+    world.renderPendingChunks(gl, 5)
   }
 
   private fun handleMovementInput() {
