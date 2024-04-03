@@ -30,7 +30,7 @@ object Bloc4J {
       moveDir.y = 0f
     }
     if (KeyboardInput.movingBackwards) {
-      moveDir.add(cameraEntity.front.mul(-1f))
+      moveDir.add(Vector3f(cameraEntity.front).mul(-1f))
       moveDir.y = 0f
     }
     if (KeyboardInput.movingLeft) {
@@ -64,7 +64,7 @@ object Bloc4J {
     // cameraEntity.target.rotation.pitch += MouseInput.dy * cameraDelta
 
     cameraEntity.target.rotation.pitch =
-      Math.clamp(-89f, 89f, cameraEntity.target.rotation.pitch)
+      Math.clamp(-88f, 88f, cameraEntity.target.rotation.pitch)
 
     cameraEntity.updateFront()
   }
