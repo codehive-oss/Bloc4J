@@ -14,14 +14,19 @@ object Bloc4J {
   val world = World()
   var cameraEntity = Camera(player)
 
+  var lastFrame = System.currentTimeMillis()
+
   fun update(gl: GL3) {
-    handleMovementInput()
+    val deltaTime = System.currentTimeMillis() - lastFrame
+    lastFrame = System.currentTimeMillis()
+
+    handleMovementInput(deltaTime)
     handleCameraMovement()
     world.loadChunksAroundPoint(player.location.toVec3f())
     world.renderPendingChunks(gl, 5)
   }
 
-  private fun handleMovementInput() {
+  private fun handleMovementInput(deltaTime: Long) {
     val cameraUp = Vector3f(0f, 1f, 0f)
 
     var moveDir = Vector3f(0f, 0f, 0f)
@@ -52,8 +57,8 @@ object Bloc4J {
       return
     }
 
-    val movementDelta = 0.2f
-    moveDir = moveDir.normalize().mul(movementDelta)
+    val movementDelta = 16f
+    moveDir = moveDir.normalize().mul(movementDelta * deltaTime.toFloat() / 1000)
 
     player.location.add(moveDir)
   }

@@ -3,6 +3,7 @@ package io.codehive.bloc4j.world
 import com.jogamp.opengl.GL3
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator
 import io.codehive.bloc4j.game.Bloc4J
+import io.codehive.bloc4j.game.Config
 import io.codehive.bloc4j.graphics.lib.Mesh
 import org.joml.Vector3f
 import org.joml.Vector3i
@@ -15,7 +16,7 @@ class Chunk(
   var dirty = true
 
   private lateinit var mesh: Mesh
-  private val data = ByteArray(16 * 16 * 16)
+  private val data = ByteArray(Config.CHUNK_SIZE * Config.CHUNK_SIZE * Config.CHUNK_SIZE)
 
   fun fill(type: BlockType) {
     for (i in data.indices) {
@@ -26,14 +27,14 @@ class Chunk(
   fun generate(type: BlockType) {
     val perlin = PerlinNoiseGenerator.newBuilder().setSeed(69420).build()
 
-    for (y in 0..<16) {
-      for (z in 0..<16) {
-        for (x in 0..<16) {
-          val index = y * 16 * 16 + z * 16 + x
+    for (y in 0..<Config.CHUNK_SIZE) {
+      for (z in 0..<Config.CHUNK_SIZE) {
+        for (x in 0..<Config.CHUNK_SIZE) {
+          val index = y * Config.CHUNK_SIZE * Config.CHUNK_SIZE + z * Config.CHUNK_SIZE + x
           val value = perlin.evaluateNoise(
-            this.coords.x + x.toDouble() / 16,
-            this.coords.y + y.toDouble() / 16,
-            this.coords.z + z.toDouble() / 16,
+            this.coords.x + x.toDouble() / Config.CHUNK_SIZE,
+            this.coords.y + y.toDouble() / Config.CHUNK_SIZE,
+            this.coords.z + z.toDouble() / Config.CHUNK_SIZE,
           )
           if (value > 0) {
             data[index] = type.ordinal.toByte()
@@ -46,7 +47,7 @@ class Chunk(
   }
 
   private fun positionToIndex(pos: Vector3i): Int {
-    return pos.y * 16 * 16 + pos.z * 16 + pos.x
+    return pos.y * Config.CHUNK_SIZE * Config.CHUNK_SIZE + pos.z * Config.CHUNK_SIZE + pos.x
   }
 
   fun getBlockAt(localX: Int, localY: Int, localZ: Int): BlockType {
@@ -54,7 +55,7 @@ class Chunk(
   }
 
   fun distanceFromPlayer(): Int {
-    return Vector3i(coords).mul(16).distanceSquared(Bloc4J.player.location.toVec3i()).toInt()
+    return Vector3i(coords).mul(Config.CHUNK_SIZE).distanceSquared(Bloc4J.player.location.toVec3i()).toInt()
   }
 
   fun recalculate(gl: GL3) {
@@ -64,9 +65,9 @@ class Chunk(
     val normals: ArrayList<Float> = ArrayList()
     var currentIndex = 0
 
-    for (y in 0..<16) {
-      for (z in 0..<16) {
-        for (x in 0..<16) {
+    for (y in 0..<Config.CHUNK_SIZE) {
+      for (z in 0..<Config.CHUNK_SIZE) {
+        for (x in 0..<Config.CHUNK_SIZE) {
           val current = Vector3i(x, y, z)
           val index = positionToIndex(current)
           val type = BlockType.entries[data[index].toInt()]
@@ -74,9 +75,9 @@ class Chunk(
             continue
           }
           val offset = Vector3f(
-            this.coords.x * 16 + x.toFloat(),
-            this.coords.y * 16 + y.toFloat(),
-            this.coords.z * 16 + z.toFloat()
+            this.coords.x * Config.CHUNK_SIZE + x.toFloat(),
+            this.coords.y * Config.CHUNK_SIZE + y.toFloat(),
+            this.coords.z * Config.CHUNK_SIZE + z.toFloat()
           )
 
           currentIndex =
@@ -181,12 +182,12 @@ class Chunk(
     val neighbourPos = Vector3i(index).add(face.dir)
     val neighbourPosGlobal =
       Vector3i(
-        this.coords.x * 16 + neighbourPos.x,
-        this.coords.y * 16 + neighbourPos.y,
-        this.coords.z * 16 + neighbourPos.z,
+        this.coords.x * Config.CHUNK_SIZE + neighbourPos.x,
+        this.coords.y * Config.CHUNK_SIZE + neighbourPos.y,
+        this.coords.z * Config.CHUNK_SIZE + neighbourPos.z,
       )
 
-    if (neighbourPos.x !in 0..<16 || neighbourPos.y !in 0..<16 || neighbourPos.z !in 0..<16) {
+    if (neighbourPos.x !in 0..<Config.CHUNK_SIZE || neighbourPos.y !in 0..<Config.CHUNK_SIZE || neighbourPos.z !in 0..<Config.CHUNK_SIZE) {
       neighbour = world.getBlockAtSafe(neighbourPosGlobal)
     } else {
       val neighbourIndex = positionToIndex(neighbourPos)

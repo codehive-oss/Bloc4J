@@ -18,14 +18,14 @@ class World {
   }
 
   fun getBlockAtSafe(pos: Vector3i): BlockType {
-    val chunkX = floor(pos.x.toFloat() / 16).toInt()
-    val chunkY = floor(pos.y.toFloat() / 16).toInt()
-    val chunkZ = floor(pos.z.toFloat() / 16).toInt()
+    val chunkX = floor(pos.x.toFloat() / Config.CHUNK_SIZE).toInt()
+    val chunkY = floor(pos.y.toFloat() / Config.CHUNK_SIZE).toInt()
+    val chunkZ = floor(pos.z.toFloat() / Config.CHUNK_SIZE).toInt()
     val chunk = getChunkAt(Vector3i(chunkX, chunkY, chunkZ)) ?: return BlockType.AIR
 
-    val localX = (pos.x % 16 + 16) % 16
-    val localY = (pos.y % 16 + 16) % 16
-    val localZ = (pos.z % 16 + 16) % 16
+    val localX = (pos.x % Config.CHUNK_SIZE + Config.CHUNK_SIZE) % Config.CHUNK_SIZE
+    val localY = (pos.y % Config.CHUNK_SIZE + Config.CHUNK_SIZE) % Config.CHUNK_SIZE
+    val localZ = (pos.z % Config.CHUNK_SIZE + Config.CHUNK_SIZE) % Config.CHUNK_SIZE
 
     return chunk.getBlockAt(
       localX,
@@ -35,9 +35,9 @@ class World {
   }
 
   fun loadChunksAroundPoint(point: Vector3f) {
-    val chunkX = floor(point.x / 16).toInt()
-    val chunkY = floor(point.y / 16).toInt()
-    val chunkZ = floor(point.z / 16).toInt()
+    val chunkX = floor(point.x / Config.CHUNK_SIZE).toInt()
+    val chunkY = floor(point.y / Config.CHUNK_SIZE).toInt()
+    val chunkZ = floor(point.z / Config.CHUNK_SIZE).toInt()
 
     val toBeRendered: MutableSet<Chunk> = mutableSetOf()
 

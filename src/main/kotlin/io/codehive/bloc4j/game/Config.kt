@@ -14,4 +14,5 @@ object Config {
   const val MOVE_DOWN_KEY = KeyEvent.VK_SHIFT
 
   const val RENDER_DISTANCE = 5
+  const val CHUNK_SIZE = 16
 }
