@@ -9,6 +9,30 @@ import kotlin.math.floor
 
 class World {
 
+  val mengerData: Array<Array<Array<Boolean>>> = Array(9) { Array(9) { Array(9) { true } } }
+
+  init {
+    menger()
+  }
+
+  private fun menger() {
+    val cubeLength = mengerData[0].size
+    val subCubeLength = cubeLength / 3
+    for (x in 0 until cubeLength) {
+      for (y in 0 until cubeLength) {
+        for (z in 0 until cubeLength) {
+          if (x in subCubeLength..<subCubeLength * 2 && y in subCubeLength..<subCubeLength * 2
+            || x in subCubeLength..<subCubeLength * 2 && z in subCubeLength..<subCubeLength * 2
+            || y in subCubeLength..<subCubeLength * 2 && z in subCubeLength..<subCubeLength * 2
+          ) {
+            mengerData[x][y][z] = false
+          }
+        }
+      }
+    }
+  }
+
+
   private val chunkBakeQueue: PriorityQueue<Chunk> =
     PriorityQueue(Comparator.comparing(Chunk::distanceFromPlayer))
   private val chunks: HashMap<Vector3i, Chunk> = HashMap()
@@ -80,7 +104,7 @@ class World {
 
   private fun loadChunk(chunk: Chunk) {
     chunks[chunk.coords] = chunk
-    chunk.generate(BlockType.STONE)
+    chunk.generate()
 
     for (face in BlockFace.entries) {
       val neighbour = getChunkAt(Vector3i(face.dir).add(chunk.coords))
