@@ -80,9 +80,18 @@ class World {
 
   private fun loadChunk(chunk: Chunk) {
     chunks[chunk.coords] = chunk
-    chunkBakeQueue.add(chunk)
     chunk.generate(BlockType.STONE)
+
+    for (face in BlockFace.entries) {
+      val neighbour = getChunkAt(Vector3i(face.dir).add(chunk.coords))
+      if (neighbour != null) {
+        neighbour.dirty = true
+        chunkBakeQueue.add(neighbour)
+      }
+    }
+    chunkBakeQueue.add(chunk)
   }
+
 
   private fun unloadChunk(chunk: Chunk) {
     chunks.remove(chunk.coords)
