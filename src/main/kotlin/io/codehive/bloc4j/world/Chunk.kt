@@ -7,7 +7,6 @@ import io.codehive.bloc4j.game.Config
 import io.codehive.bloc4j.graphics.lib.Mesh
 import org.joml.Vector3f
 import org.joml.Vector3i
-import kotlin.math.abs
 
 class Chunk(
   private val world: World,
@@ -18,8 +17,6 @@ class Chunk(
 
   private lateinit var mesh: Mesh
   private val data = ByteArray(Config.CHUNK_SIZE * Config.CHUNK_SIZE * Config.CHUNK_SIZE)
-  val perlin = PerlinNoiseGenerator.newBuilder().setSeed(69420).build()
-
 
   fun fill(type: BlockType) {
     for (i in data.indices) {
@@ -27,48 +24,27 @@ class Chunk(
     }
   }
 
-  fun generate() {
+  fun generate(type: BlockType) {
+    val perlin = PerlinNoiseGenerator.newBuilder().setSeed(69420).build()
+
     for (y in 0..<Config.CHUNK_SIZE) {
       for (z in 0..<Config.CHUNK_SIZE) {
         for (x in 0..<Config.CHUNK_SIZE) {
           val index = y * Config.CHUNK_SIZE * Config.CHUNK_SIZE + z * Config.CHUNK_SIZE + x
-          val worldCoords = Vector3i(
-            this.coords.x * Config.CHUNK_SIZE + x,
-            this.coords.y * Config.CHUNK_SIZE + y,
-            this.coords.z * Config.CHUNK_SIZE + z
+          val value = perlin.evaluateNoise(
+            this.coords.x + x.toDouble() / Config.CHUNK_SIZE,
+            this.coords.y + y.toDouble() / Config.CHUNK_SIZE,
+            this.coords.z + z.toDouble() / Config.CHUNK_SIZE,
           )
-          data[index] = menger(worldCoords).ordinal.toByte()
+          if (value > 0) {
+            data[index] = type.ordinal.toByte()
+          } else {
+            data[index] = BlockType.AIR.ordinal.toByte()
+          }
         }
       }
     }
   }
-
-  private fun perlin(coords: Vector3i): BlockType {
-    val value = perlin.evaluateNoise(
-      coords.x.toDouble() / Config.CHUNK_SIZE,
-      coords.y.toDouble() / Config.CHUNK_SIZE,
-      coords.z.toDouble() / Config.CHUNK_SIZE,
-    )
-    return if (value > 0) {
-      BlockType.STONE
-    } else {
-      BlockType.AIR
-    }
-  }
-
-  private fun menger(coords: Vector3i): BlockType {
-    val length = world.mengerData[0].size
-    coords.x = abs(coords.x % length)
-    coords.y = abs(coords.y % length)
-    coords.z = abs(coords.z % length)
-
-    return if (world.mengerData[coords.x][coords.y][coords.z]) {
-      BlockType.STONE
-    } else {
-      BlockType.AIR
-    }
-  }
-
 
   private fun positionToIndex(pos: Vector3i): Int {
     return pos.y * Config.CHUNK_SIZE * Config.CHUNK_SIZE + pos.z * Config.CHUNK_SIZE + pos.x
@@ -79,8 +55,7 @@ class Chunk(
   }
 
   fun distanceFromPlayer(): Int {
-    return Vector3i(coords).mul(Config.CHUNK_SIZE).distanceSquared(Bloc4J.player.location.toVec3i())
-      .toInt()
+    return Vector3i(coords).mul(Config.CHUNK_SIZE).distanceSquared(Bloc4J.player.location.toVec3i()).toInt()
   }
 
   fun recalculate(gl: GL3) {
@@ -187,7 +162,7 @@ class Chunk(
   }
 
   fun render() {
-    if (!dirty) {
+    if(!dirty) {
       mesh.render()
     }
   }
