@@ -16,12 +16,19 @@ object Bloc4J {
 
   var lastFrame = System.currentTimeMillis()
 
+  init {
+    world.worldPhysics.addEntityToWorld(player)
+  }
+
   fun update(gl: GL3) {
     val deltaTime = System.currentTimeMillis() - lastFrame
     lastFrame = System.currentTimeMillis()
 
     handleMovementInput(deltaTime)
     handleCameraMovement()
+
+    world.worldPhysics.update(deltaTime)
+
     world.loadChunksAroundPoint(player.location.toVec3f())
     world.renderPendingChunks(gl, 5)
   }

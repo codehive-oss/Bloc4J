@@ -66,7 +66,7 @@ class MainApplication : GraphicsApplication {
         Math.toRadians(90.toDouble()).toFloat(),
         Window.width.toFloat() / Window.height,
         0.1f,
-        100f
+        1000f
       )
 
     shaderProgram.use()

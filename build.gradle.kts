@@ -23,6 +23,8 @@ dependencies {
 
   implementation("commons-io:commons-io:2.15.1")
   implementation("de.articdive:jnoise-pipeline:4.1.0")
+
+  implementation("cz.advel.jbullet:jbullet:20101010-1")
 }
 
 application {

@@ -1,5 +1,11 @@
 package io.codehive.bloc4j.world
 
+import com.bulletphysics.collision.shapes.BvhTriangleMeshShape
+import com.bulletphysics.collision.shapes.TriangleIndexVertexArray
+import com.bulletphysics.dynamics.RigidBody
+import com.bulletphysics.dynamics.RigidBodyConstructionInfo
+import com.bulletphysics.linearmath.DefaultMotionState
+import com.bulletphysics.linearmath.Transform
 import com.jogamp.opengl.GL3
 import de.articdive.jnoise.generators.noisegen.perlin.PerlinNoiseGenerator
 import io.codehive.bloc4j.game.Bloc4J
@@ -7,6 +13,9 @@ import io.codehive.bloc4j.game.Config
 import io.codehive.bloc4j.graphics.lib.Mesh
 import org.joml.Vector3f
 import org.joml.Vector3i
+import java.nio.ByteBuffer
+import javax.vecmath.Matrix4f
+import javax.vecmath.Quat4f
 
 class Chunk(
   private val world: World,
@@ -16,6 +25,7 @@ class Chunk(
   var dirty = true
 
   private lateinit var mesh: Mesh
+  private lateinit var physicsMesh: BvhTriangleMeshShape
   private val data = ByteArray(Config.CHUNK_SIZE * Config.CHUNK_SIZE * Config.CHUNK_SIZE)
 
   fun fill(type: BlockType) {
@@ -23,6 +33,7 @@ class Chunk(
       data[i] = type.ordinal.toByte()
     }
   }
+
 
   fun generate(type: BlockType) {
     val perlin = PerlinNoiseGenerator.newBuilder().setSeed(69420).build()
@@ -46,6 +57,22 @@ class Chunk(
     }
   }
 
+  fun generate2() {
+    for (y in 0..<Config.CHUNK_SIZE) {
+      for (z in 0..<Config.CHUNK_SIZE) {
+        for (x in 0..<Config.CHUNK_SIZE) {
+          val index = y * Config.CHUNK_SIZE * Config.CHUNK_SIZE + z * Config.CHUNK_SIZE + x
+          data[index] = if (this.coords.y + y.toDouble() / Config.CHUNK_SIZE == 0.0) {
+            BlockType.STONE
+          } else {
+            BlockType.AIR
+          }.ordinal.toByte()
+
+        }
+      }
+    }
+  }
+
   private fun positionToIndex(pos: Vector3i): Int {
     return pos.y * Config.CHUNK_SIZE * Config.CHUNK_SIZE + pos.z * Config.CHUNK_SIZE + pos.x
   }
@@ -55,7 +82,8 @@ class Chunk(
   }
 
   fun distanceFromPlayer(): Int {
-    return Vector3i(coords).mul(Config.CHUNK_SIZE).distanceSquared(Bloc4J.player.location.toVec3i()).toInt()
+    return Vector3i(coords).mul(Config.CHUNK_SIZE)
+      .distanceSquared(Bloc4J.player.location.toVec3i()).toInt()
   }
 
   fun recalculate(gl: GL3) {
@@ -150,6 +178,42 @@ class Chunk(
       }
     }
 
+    val indicesBuffer = ByteBuffer.allocate(indices.size * Int.SIZE_BYTES)
+    for (index in indices) {
+      indicesBuffer.putInt(index)
+    }
+
+    val positionsBuffer = ByteBuffer.allocate(positions.size * Float.SIZE_BYTES)
+    for (position in positions) {
+      positionsBuffer.putFloat(position)
+    }
+
+    val indexVertexArray = TriangleIndexVertexArray(
+      positions.size / 3,
+      indicesBuffer,
+      3,
+      indices.size,
+      positionsBuffer,
+      3
+    )
+    physicsMesh = BvhTriangleMeshShape(indexVertexArray, true)
+
+    val motionState =
+      DefaultMotionState(
+        Transform(
+          Matrix4f(
+            Quat4f(0f, 0f, 0f, 1f),
+            javax.vecmath.Vector3f(coords.x * 16f, coords.y * 16f, coords.z * 16f),
+            1.0f
+          )
+        )
+      )
+
+    val rigidBodyCI =
+      RigidBodyConstructionInfo(0f, motionState, physicsMesh, javax.vecmath.Vector3f(0f, 0f, 0f))
+    val rigidBody = RigidBody(rigidBodyCI)
+    world.worldPhysics.dynamicsWorld.addRigidBody(rigidBody)
+
     mesh = Mesh(
       gl,
       positions.toFloatArray(),
@@ -162,7 +226,7 @@ class Chunk(
   }
 
   fun render() {
-    if(!dirty) {
+    if (!dirty) {
       mesh.render()
     }
   }

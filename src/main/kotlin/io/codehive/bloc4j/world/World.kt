@@ -12,6 +12,7 @@ class World {
   private val chunkBakeQueue: PriorityQueue<Chunk> =
     PriorityQueue(Comparator.comparing(Chunk::distanceFromPlayer))
   private val chunks: HashMap<Vector3i, Chunk> = HashMap()
+  val worldPhysics = WorldPhysics()
 
   private fun getChunkAt(coords: Vector3i): Chunk? {
     return chunks[coords]
@@ -80,7 +81,8 @@ class World {
 
   private fun loadChunk(chunk: Chunk) {
     chunks[chunk.coords] = chunk
-    chunk.generate(BlockType.STONE)
+//    chunk.generate(BlockType.STONE)
+    chunk.generate2()
 
     for (face in BlockFace.entries) {
       val neighbour = getChunkAt(Vector3i(face.dir).add(chunk.coords))
